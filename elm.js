@@ -10503,8 +10503,9 @@ Elm.Main.make = function (_elm) {
                                                        ,{ctor: "_Tuple2",_0: "width",_1: "100%"}]));
    var item_style = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "flex-grow",_1: "1"}
                                                    ,{ctor: "_Tuple2",_0: "flex-shrink",_1: "1"}
-                                                   ,{ctor: "_Tuple2",_0: "flex-basis",_1: "150px"}]));
-   var container_style = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "display",_1: "flex"}]));
+                                                   ,{ctor: "_Tuple2",_0: "flex-basis",_1: "150px"}
+                                                   ,{ctor: "_Tuple2",_0: "height",_1: "100%"}]));
+   var container_style = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "display",_1: "flex"},{ctor: "_Tuple2",_0: "height",_1: "100vh"}]));
    var make_input = F2(function (address,text) {
       return A2($Html.textarea,
       _U.list([$Html$Attributes.placeholder("0900 Example task")
@@ -10512,13 +10513,6 @@ Elm.Main.make = function (_elm) {
               ,A3($Html$Events.on,"input",$Html$Events.targetValue,$Signal.message(address))
               ,textarea_style]),
       _U.list([]));
-   });
-   var list = function (n) {    return A2($Html.ul,_U.list([]),A2($List.map,function (x) {    return A2($Html.li,_U.list([]),_U.list([$Html.text(x)]));},n));};
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([container_style]),
-      _U.list([A2($Html.div,_U.list([item_style]),_U.list([A2(make_input,address,model.text)]))
-              ,A2($Html.div,_U.list([item_style]),_U.list([list(model.times)]))]));
    });
    var format_time = function (x) {
       var _p0 = x;
@@ -10530,6 +10524,19 @@ Elm.Main.make = function (_elm) {
       var string_mins = $Basics.toString(mins);
       return A2($Basics._op["++"],string_hrs,A2($Basics._op["++"],"h ",A2($Basics._op["++"],string_mins,A2($Basics._op["++"],"m - ",name))));
    };
+   var list = F2(function (times,total) {
+      var format = F2(function (attr,x) {    return A2($Html.li,_U.list([$Html$Attributes.style(attr)]),_U.list([$Html.text(format_time(x))]));});
+      var formatted_times = A2($List.map,format(_U.list([])),times);
+      var total_time = A2(format,_U.list([{ctor: "_Tuple2",_0: "color",_1: "DarkGray"}]),{ctor: "_Tuple2",_0: "Total",_1: total});
+      var list_items = A2($List.append,formatted_times,_U.list([total_time]));
+      return A2($Html.ul,_U.list([]),list_items);
+   });
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([container_style]),
+      _U.list([A2($Html.div,_U.list([item_style]),_U.list([A2(make_input,address,model.text)]))
+              ,A2($Html.div,_U.list([item_style]),_U.list([A2(list,model.times,model.total)]))]));
+   });
    var time_collect = F2(function (x,dict) {
       var _p1 = x;
       var name = _p1._0;
@@ -10563,9 +10570,7 @@ Elm.Main.make = function (_elm) {
             return _U.list([]);
          }
    };
-   var to_thing = function (x) {
-      return A2($List.map,format_time,$Dict.toList(A3($List.foldl,time_collect,$Dict.empty,A2($List.map,to_minutes,zip_self(x)))));
-   };
+   var to_worked_times = function (x) {    return $Dict.toList(A3($List.foldl,time_collect,$Dict.empty,A2($List.map,to_minutes,zip_self(x))));};
    var valid_time_values = function (x) {
       var _p7 = x;
       var hr = _p7._0;
@@ -10608,36 +10613,37 @@ Elm.Main.make = function (_elm) {
                }
          }
    };
-   var maybe_valid_time = function (line) {
+   var maybe_valid_time_entry = function (line) {
       var splitResult = A3($Regex.split,$Regex.AtMost(1),$Regex.regex(" "),line);
       return A2($Maybe.andThen,A2($Maybe.andThen,A2($Maybe.andThen,maybe_two(splitResult),valid_time_length),numeric_min_hours),valid_time_values);
    };
    var update = F2(function (newStr,oldModel) {
       var lines = A2($String.split,"\n",newStr);
-      var valid_times = A2($List.filterMap,maybe_valid_time,lines);
-      var converted_times = to_thing(valid_times);
-      return {text: newStr,times: converted_times};
+      var valid_time_entries = A2($List.filterMap,maybe_valid_time_entry,lines);
+      var converted_times = to_worked_times(valid_time_entries);
+      var total = A3($List.foldl,F2(function (_p14,c) {    var _p15 = _p14;return _p15._1 + c;}),0,converted_times);
+      return {text: newStr,times: converted_times,total: total};
    });
-   var initial_model = {text: "",times: _U.list([])};
+   var initial_model = {text: "",times: _U.list([]),total: 0};
    var main = $StartApp$Simple.start({model: initial_model,view: view,update: update});
-   var Model = F2(function (a,b) {    return {text: a,times: b};});
+   var Model = F3(function (a,b,c) {    return {text: a,times: b,total: c};});
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,main: main
                              ,initial_model: initial_model
                              ,update: update
-                             ,maybe_valid_time: maybe_valid_time
+                             ,maybe_valid_time_entry: maybe_valid_time_entry
                              ,maybe_two: maybe_two
                              ,valid_time_length: valid_time_length
                              ,numeric_min_hours: numeric_min_hours
                              ,valid_time_values: valid_time_values
-                             ,to_thing: to_thing
+                             ,to_worked_times: to_worked_times
                              ,zip_self: zip_self
                              ,to_minutes: to_minutes
                              ,time_collect: time_collect
-                             ,format_time: format_time
                              ,view: view
                              ,list: list
+                             ,format_time: format_time
                              ,make_input: make_input
                              ,container_style: container_style
                              ,item_style: item_style
