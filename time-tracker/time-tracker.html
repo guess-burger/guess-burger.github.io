@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <script src="times.min.js"></script>
+        <link rel="stylesheet" href="css/times.css">
+    </head>
+    <body>
+        <script>
+            var storedState = localStorage.getItem('time-tracker-state');
+            var startingState = storedState ? JSON.parse(storedState) : null;
+            var timeTracker = Elm.SimpleTimeTracker.fullscreen(startingState);
+
+            timeTracker.ports.setStorage.subscribe(function(state) {
+                localStorage.setItem('time-tracker-state',  JSON.stringify(state));
+            });
+        </script>
+    </body>
+</html>
