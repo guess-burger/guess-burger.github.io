@@ -8,5 +8,7 @@ Here's a selection of random things I've made:
 
 [Mandelbrot-cljs](http://guess-burger.github.io/mandelbrot-cljs/) - [src](https://github.com/guess-burger/mandelbrot-cljs) - A naive Mandlebrot demonstration allowing "click to zoom" exploration
 
-[Time Tracker](http://guess-burger.github.io/time-tracker/time-tracker.html) - [src](https://github.com/guess-burger/elm-time) - A simple tool to make time sheet easier written in Elm
+[Time Sheets](http://guess-burger.github.io/timesheets/) - A simple tool for making time tracking and time sheets easierwrittern in ClojureScript.
+
+[Time Tracker](http://guess-burger.github.io/time-tracker/time-tracker.html) - [src](https://github.com/guess-burger/elm-time) - An earlier, less complete attempt at making timesheets easier, written in Elm
 
